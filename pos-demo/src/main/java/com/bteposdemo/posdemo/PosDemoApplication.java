@@ -8,6 +8,7 @@ public class PosDemoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(PosDemoApplication.class, args);
+		System.out.println("Test");
 	}
 
 }
