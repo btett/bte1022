@@ -13,4 +13,12 @@ public enum RentalTool {
         this.type = type;
         this.brand = brand;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }

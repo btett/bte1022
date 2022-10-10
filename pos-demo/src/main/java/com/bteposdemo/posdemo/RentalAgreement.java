@@ -1,7 +1,10 @@
 package com.bteposdemo.posdemo;
 
 import com.bteposdemo.staticdata.RentalTool;
+import com.bteposdemo.staticdata.RentalToolCharges;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 public class RentalAgreement {
@@ -20,9 +23,16 @@ public class RentalAgreement {
     private double finalTotalCost;
 
 
+    LocalDateTime getDueDate() {
+        return LocalDateTime.from(checkoutDate.toInstant().atZone(ZoneId.of("UTC"))).plusDays(rentalDayCount);
+    }
 
     void printRentalAgreement() {
 
     }
 
+
+    double getDailyRentalChargeRate(){
+        return RentalToolCharges.valueOf(rentalTool.getType()).getDailyChargePrice();
+    }
 }
