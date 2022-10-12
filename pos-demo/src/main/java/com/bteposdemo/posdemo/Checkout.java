@@ -18,6 +18,12 @@ public class Checkout {
 
     public RentalAgreement userInputPrompt() {
         inputScanner = new Scanner(System.in);
+
+        try {
+
+        } catch {
+
+        }
         return null;
     }
 

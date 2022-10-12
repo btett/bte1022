@@ -6,8 +6,6 @@ import com.bteposdemo.staticdata.RentalToolCharges;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,11 +32,11 @@ public class RentalAgreement {
     }
 
     int getChargeableRentalDays() {
-        if(RentalToolCharges.)
+        if (RentalToolCharges.)
     }
 
     long calcWeekdaysBetweenDates() {
-         return checkoutDate.datesUntil(getDueDate())
+        return checkoutDate.datesUntil(getDueDate())
                 .filter(d -> !weekend.contains(d.getDayOfWeek()))
                 .count();
     }
@@ -58,20 +56,19 @@ public class RentalAgreement {
         int holidaysFound = 0;
         LocalDate julyDateToCheck;
         boolean laborDayFound = false;
-        for(LocalDate date : checkoutDate.datesUntil(getDueDate()).collect(Collectors.toList())){
-            if(date.getMonth().equals(Month.JULY) && date.getDayOfMonth() == 4){
-                if(date.getDayOfWeek().equals(DayOfWeek.SUNDAY)){
-                    if(getDueDate().getDayOfMonth() != 5){
+        for (LocalDate date : checkoutDate.datesUntil(getDueDate()).collect(Collectors.toList())) {
+            if (date.getMonth().equals(Month.JULY) && date.getDayOfMonth() == 4) {
+                if (date.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+                    if (getDueDate().getDayOfMonth() != 5) {
                         holidaysFound++;
                         continue;
                     }
-                }
-                else {
+                } else {
                     holidaysFound++;
                     continue;
                 }
             }
-            if(!laborDayFound && date.getMonth().equals(Month.SEPTEMBER) && date.getDayOfWeek().equals(DayOfWeek.MONDAY)){
+            if (!laborDayFound && date.getMonth().equals(Month.SEPTEMBER) && date.getDayOfWeek().equals(DayOfWeek.MONDAY)) {
                 laborDayFound = true;
                 holidaysFound++;
                 continue;
@@ -81,13 +78,12 @@ public class RentalAgreement {
     }
 
 
-
     void printRentalAgreement() {
 
     }
 
 
-    double getDailyRentalChargeRate(){
+    double getDailyRentalChargeRate() {
         return RentalToolCharges.valueOf(rentalTool.getType()).getDailyChargePrice();
     }
 }
