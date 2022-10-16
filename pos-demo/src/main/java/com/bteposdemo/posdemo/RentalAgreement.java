@@ -136,7 +136,6 @@ public class RentalAgreement {
     public void printRentalAgreement() {
         //processRentalAgreement is called first to perform necessary date and currency calculations
         processRentalAgreement();
-
         System.out.println("Tool code: " + rentalTool.name());
         System.out.println("Tool type: " + rentalTool.getType());
         System.out.println("Tool brand: " + rentalTool.getBrand());
@@ -149,6 +148,8 @@ public class RentalAgreement {
         System.out.println("Discount percent: " + getDiscountPercent() + "%");
         System.out.println("Discount amount: $" + getDiscountAmount());
         System.out.println("Final total charge: $" + getFinalTotal());
+        System.out.println("");
+
     }
 
     public int getChargeableRentalDays() {
