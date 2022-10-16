@@ -22,10 +22,8 @@ public class Checkout {
     private LocalDate checkoutDate;
     private Scanner inputScanner = new Scanner(System.in);;
 
-
+    //used to gather user (employee) input to produce a rental agreement
     public RentalAgreement userInputPrompt() {
-       // inputScanner = new Scanner(System.in);
-
         while (rentalTool == null) {
             try {
                 toolCodeUserPrompt();
@@ -61,7 +59,7 @@ public class Checkout {
 
     public RentalTool toolCodeUserPrompt() throws InvalidToolCodeException {
         String userInput;
-        boolean validToolEntered = false;
+        boolean validToolEntered;
         System.out.println("Enter tool code of rental tool : ");
         userInput = inputScanner.nextLine();
         String finalUserInput = userInput;
@@ -92,7 +90,6 @@ public class Checkout {
 
     public int rentalDayUserPrompt() throws InvalidRentalDaysException {
         System.out.println("Enter amount of rental days : ");
-
         String inputString = inputScanner.nextLine();
         int userInput;
         try {
@@ -101,7 +98,6 @@ public class Checkout {
         catch (NumberFormatException e){
             throw new InvalidRentalDaysException("Invalid rental days entered.");
         }
-
 
         if (userInput < 1) {
             throw new InvalidRentalDaysException("Invalid rental days entered.");
@@ -125,6 +121,7 @@ public class Checkout {
             throw new InvalidDiscountException("Invalid discount percentage entered.");
         }
         this.discountPercent = userInput;
+
         return this.discountPercent;
     }
 

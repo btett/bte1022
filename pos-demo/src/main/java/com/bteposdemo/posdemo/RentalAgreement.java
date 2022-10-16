@@ -3,6 +3,8 @@ package com.bteposdemo.posdemo;
 import com.bteposdemo.staticdata.RentalTool;
 import com.bteposdemo.staticdata.RentalToolCharges;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -14,13 +16,16 @@ import java.util.stream.Collectors;
 
 public class RentalAgreement {
     private final Set<DayOfWeek> weekend = EnumSet.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    private final DecimalFormat currencyFormatter = new DecimalFormat("#,###.00");
+
+    //provided values from checkout input prompts
     private final RentalTool rentalTool;
     private final int rentalDayCount;
     private final LocalDate checkoutDate;
     private final double discountPercent;
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-    private final DecimalFormat currencyFormatter = new DecimalFormat("#,###.00");
 
+    //calculated based on checkout provided values
     private int chargeableRentalDays;
     private double prediscountTotal;
     private double dailyRentalChargeRate;
@@ -44,10 +49,7 @@ public class RentalAgreement {
         this.dueDate = checkoutDate.plusDays(rentalDayCount);
     }
 
-    public LocalDate getDueDate() {
-        return this.dueDate;
-    }
-
+    //calculates actual days to be charged based on checkout/due dates and the specific tool's rental charges
     private void calcChargeableRentalDays() {
         int chargeableDays = 0;
         RentalToolCharges toolCharges = RentalToolCharges.valueOf(rentalTool.getType());
@@ -65,29 +67,26 @@ public class RentalAgreement {
         this.chargeableRentalDays = chargeableDays;
     }
 
-    public int getChargeableRentalDays() {
-        return chargeableRentalDays;
-    }
-
-
     private long calcWeekdaysBetween() {
-        return checkoutDate.plusDays(1).datesUntil(getDueDate().plusDays(1))
+        return checkoutDate.plusDays(1).datesUntil(this.dueDate.plusDays(1))
                 .filter(d -> !weekend.contains(d.getDayOfWeek()))
                 .count();
     }
 
     private long calcWeekendDaysBetween() {
-        return checkoutDate.datesUntil(getDueDate())
+        return checkoutDate.datesUntil(this.dueDate)
                 .filter(d -> weekend.contains(d.getDayOfWeek()))
                 .count();
     }
 
     private long calcAllDaysBetween() {
-        return checkoutDate.plusDays(1).datesUntil(getDueDate().plusDays(1)).count();
+        return checkoutDate.plusDays(1).datesUntil(this.dueDate.plusDays(1)).count();
     }
 
     private int calcHolidaysBetween() {
         int holidaysFound = 0;
+
+        //special case - if checkout date is in september, we need to see if labor day already happened before checkout date
         boolean laborDayFound = false;
         if (checkoutDate.getMonth().equals(Month.SEPTEMBER)) {
             for (LocalDate date : checkoutDate.minusDays(checkoutDate.getDayOfMonth() - 1).datesUntil(checkoutDate).collect(Collectors.toList())) {
@@ -96,11 +95,11 @@ public class RentalAgreement {
                 }
             }
         }
-//        for (LocalDate date : checkoutDate.plusDays(1).datesUntil(getDueDate()).collect(Collectors.toList())) {
-        for (LocalDate date : checkoutDate.datesUntil(getDueDate()).collect(Collectors.toList())) {
+        for (LocalDate date : checkoutDate.datesUntil(this.dueDate).collect(Collectors.toList())) {
             if (date.getMonth().equals(Month.JULY) && date.getDayOfMonth() == 4) {
                 if (date.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
-                    if (getDueDate().getDayOfMonth() != 4) {
+                    //special case for Independence day - we don't give free holiday charge on exact day July,4 Sun since checkout date is before observed holiday
+                    if (this.dueDate.getDayOfMonth() != 4) {
                         holidaysFound++;
                         continue;
                     }
@@ -109,6 +108,7 @@ public class RentalAgreement {
                     continue;
                 }
             }
+            //if we didn't already find labor day in our special case check, we now look for first Monday after checkout date
             if (!laborDayFound && date.getMonth().equals(Month.SEPTEMBER) && date.getDayOfWeek().equals(DayOfWeek.MONDAY)) {
                 laborDayFound = true;
                 holidaysFound++;
@@ -119,31 +119,11 @@ public class RentalAgreement {
     }
 
     private void calcPrediscountTotal() {
-        this.prediscountTotal = getChargeableRentalDays() * getDailyRentalChargeRate();
-    }
-
-    public double getPrediscountTotal() {
-        return this.prediscountTotal;
-    }
-
-    public double getDiscountAmount() {
-        return getPrediscountTotal() * discountPercent;
-    }
-
-    private double getFinalTotal() {
-        return getPrediscountTotal() - getDiscountAmount();
+        this.prediscountTotal = getChargeableRentalDays() * dailyRentalChargeRate;
     }
 
     private void calcDailyRentalChargeRate() {
         this.dailyRentalChargeRate = RentalToolCharges.valueOf(rentalTool.getType()).getDailyChargePrice();
-    }
-
-    private double getDailyRentalChargeRate() {
-        return this.dailyRentalChargeRate;
-    }
-
-    public double getDiscountPercent() {
-        return discountPercent;
     }
 
     private void processRentalAgreement() {
@@ -154,19 +134,60 @@ public class RentalAgreement {
     }
 
     public void printRentalAgreement() {
+        //processRentalAgreement is called first to perform necessary date and currency calculations
         processRentalAgreement();
+
         System.out.println("Tool code: " + rentalTool.name());
         System.out.println("Tool type: " + rentalTool.getType());
         System.out.println("Tool brand: " + rentalTool.getBrand());
-        System.out.println("Rental days: " + rentalDayCount);
-        System.out.println("Checkout date: " + formatter.format(checkoutDate));
-        System.out.println("Due date: " + formatter.format(getDueDate()));
-        System.out.println("Daily rental charge: $" + currencyFormatter.format(getDailyRentalChargeRate()));
+        System.out.println("Rental days: " + getRentalDayCount());
+        System.out.println("Checkout date: " + getCheckoutDate());
+        System.out.println("Due date: " + getDueDate());
+        System.out.println("Daily rental charge: $" + getDailyRentalChargeRate());
         System.out.println("Chargeable rental days: " + getChargeableRentalDays());
-        System.out.println("Pre-discount total charge: $" + currencyFormatter.format(getPrediscountTotal()));
-        System.out.println("Discount percent: " + (int) (getDiscountPercent() * 100) + "%");
-        System.out.println("Discount amount: $" + currencyFormatter.format(getDiscountAmount()));
-        System.out.println("Final total charge: $" + currencyFormatter.format(getFinalTotal()));
+        System.out.println("Pre-discount total charge: $" + getPrediscountTotal());
+        System.out.println("Discount percent: " + getDiscountPercent() + "%");
+        System.out.println("Discount amount: $" + getDiscountAmount());
+        System.out.println("Final total charge: $" + getFinalTotal());
     }
 
+    public int getChargeableRentalDays() {
+        return chargeableRentalDays;
+    }
+
+    public RentalTool getRentalTool() {
+        return rentalTool;
+    }
+
+    public int getRentalDayCount() {
+        return rentalDayCount;
+    }
+
+    public String getCheckoutDate() {
+        return formatter.format(checkoutDate);
+    }
+
+    public String getDueDate() {
+        return formatter.format(dueDate);
+    }
+
+    public String getDailyRentalChargeRate() {
+        return currencyFormatter.format(dailyRentalChargeRate);
+    }
+
+    public String getPrediscountTotal() {
+        return currencyFormatter.format(prediscountTotal);
+    }
+
+    public int getDiscountPercent() {
+        return (int) (discountPercent * 100);
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return new BigDecimal(prediscountTotal * discountPercent).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    public BigDecimal getFinalTotal() {
+        return new BigDecimal(String.valueOf(new BigDecimal(prediscountTotal).subtract(getDiscountAmount()))).setScale(2, RoundingMode.HALF_UP);
+    }
 }
