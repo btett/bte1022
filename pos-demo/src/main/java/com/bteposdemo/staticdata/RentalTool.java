@@ -22,4 +22,10 @@ public enum RentalTool {
         return brand;
     }
 
+    @Override
+    public String toString() {
+        return "[" + name() + "]" + " - Type: " + getType() + ", Brand: " + getBrand();
+    }
+
+
 }
