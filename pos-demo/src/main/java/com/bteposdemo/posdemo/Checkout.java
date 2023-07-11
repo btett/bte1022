@@ -6,7 +6,6 @@ import com.bteposdemo.exceptions.InvalidRentalDaysException;
 import com.bteposdemo.exceptions.InvalidToolCodeException;
 import com.bteposdemo.staticdata.RentalTool;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -60,8 +59,10 @@ public class Checkout {
     public RentalTool toolCodeUserPrompt() throws InvalidToolCodeException {
         String userInput;
         boolean validToolEntered;
-        System.out.println("Enter tool code of rental tool : ");
-        userInput = inputScanner.nextLine();
+        System.out.println("Enter the code for one of these available tools to rent: ");
+        for (RentalTool tool : RentalTool.values()) {
+            System.out.println(tool);
+        }        userInput = inputScanner.nextLine();
         String finalUserInput = userInput;
         validToolEntered = Stream.of(RentalTool.values()).anyMatch(e -> e.name().equals(finalUserInput));
         if (validToolEntered) {
