@@ -24,7 +24,7 @@ public enum RentalTool {
 
     @Override
     public String toString() {
-        return name() + " - Type: " + getType() + ", Brand: " + getBrand();
+        return "[" + name() + "]" + " - Type: " + getType() + ", Brand: " + getBrand();
     }
 
 
